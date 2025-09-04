@@ -145,7 +145,7 @@ const EditViaticosPage = () => {
     }
     setLoading(true);
     axios
-      .get('${import.meta.env.VITE_API_URL}/api/viaticos', {
+      .get(`${import.meta.env.VITE_API_URL}/api/viaticos`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setItems(Array.isArray(res.data) ? res.data : []))

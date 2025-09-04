@@ -351,7 +351,7 @@ const AddViaticoPage = () => {
   
     try {
       const token = localStorage.getItem('auth-token');
-      await axios.post('${import.meta.env.VITE_API_URL}/api/viaticos', payload, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/viaticos`, payload, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
   
