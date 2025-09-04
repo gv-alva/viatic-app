@@ -1,28 +1,26 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './Navbar.module.css';
-import logoImage from '../assets/login_logo.png';
+// src/components/Navbar.jsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./Navbar.module.css";
 
-const Navbar = () => {
+export default function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('auth-token');
-    navigate('/login');
+    // borra toda la sesión
+    localStorage.removeItem("auth-token");
+    localStorage.removeItem("userId");
+    // redirige a login
+    navigate("/login");
   };
 
   return (
     <nav className={styles.navbar}>
-      <div className={styles.brand}>
-        <img src={logoImage} alt="Viatic logo" className={styles.logo} />
-        <h1 className={styles.title}>Viatic</h1>
-      </div>
-
-      <button onClick={handleLogout} className={styles.logoutButton}>
-        Cerrar Sesión
+      <h1 className={styles.title}>Viatic App</h1>
+      <button onClick={handleLogout} className={styles.logout}>
+        Cerrar sesión
       </button>
     </nav>
   );
-};
+}
 
-export default Navbar;

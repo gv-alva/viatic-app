@@ -1,17 +1,15 @@
+// src/components/ProtectedRoute.jsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
-const ProtectedRoute = ({ children }) => {
-  // Verificamos si existe el token en localStorage
+export default function ProtectedRoute({ children }) {
   const token = localStorage.getItem('auth-token');
+  const location = useLocation();
 
+  // Si NO hay sesión, manda al login y recuerda de dónde venía
   if (!token) {
-    // Si no hay token, redirigimos al login
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
-
-  // Si hay un token, mostramos el componente hijo (en este caso, HomePage)
+  // Si hay sesión, renderiza la ruta privada
   return children;
-};
-
-export default ProtectedRoute;
+}
