@@ -1,0 +1,230 @@
+.page {
+  min-height: 100vh;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+
+  
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+  
+  .headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .backBtn {
+    background: #fff;
+    color: #1340BD;
+    font-weight: 600;
+    border: 2px solid #1340BD;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,.06);
+  }
+  .backBtn:hover { background: #edf2ff; }
+  
+  .switchCard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 20px rgba(0,0,0,.05);
+    margin-bottom: 22px;
+  }
+  
+  .switchLabel {
+    font-weight: 600;
+    color: #7a859c;
+    transition: color .2s ease;
+  }
+  .switchLabel.active { color: #1340BD; }
+  
+  .switch {
+    position: relative;
+    width: 72px;
+    height: 36px;
+    border-radius: 999px;
+    border: 2px solid #c6cde0;
+    background: linear-gradient(180deg, #f9fbff, #edf1f8);
+    cursor: pointer;
+    padding: 0;
+  }
+  .switch .knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1340BD;
+    box-shadow: 0 6px 12px rgba(19,64,189,.35);
+    transition: transform .22s ease;
+  }
+  .switch.right .knob { transform: translateX(36px); }
+  .switch.left .knob { transform: translateX(0); }
+  
+  .form {
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 20px rgba(0,0,0,.05);
+  }
+  
+  .formTitle {
+    margin: 4px 0 14px;
+    font-size: 1.1rem;
+    color: #0f172a;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 14px;
+  }
+  
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field > span {
+    font-size: .9rem;
+    color: #475569;
+  }
+  .field > input {
+    height: 42px;
+    padding: 10px 12px;
+    border: 1.8px solid #cfd6e6;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field > input:focus {
+    border-color: #1340BD;
+    box-shadow: 0 0 0 3px rgba(19,64,189,.12);
+  }
+  
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+  
+  .primary {
+    background: #1340BD;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .primary:hover { background: #0f33a0; }
+  
+  .secondary {
+    background: #fff;
+    color: #475569;
+    border: 1.8px solid #cfd6e6;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .secondary:hover { background: #f7f9fc; }
+  
+  .field > select {
+    height: 42px;
+    padding: 10px 12px;
+    border: 1.8px solid #cfd6e6;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    background: #fff;
+  }
+  .field > select:focus {
+    border-color: #1340BD;
+    box-shadow: 0 0 0 3px rgba(19,64,189,.12);
+  }
+  
+
+
+  /* === Mobile: <=640px === */
+@media (max-width: 640px) {
+  .container {
+    padding: 16px 12px 28px;
+  }
+
+  .headerRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .backBtn {
+    align-self: flex-end;
+  }
+
+  /* Switch compacto y de ancho auto */
+  .switchCard {
+    padding: 10px 12px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+  .switch {
+    width: 64px;
+    height: 32px;
+  }
+  .switch .knob {
+    width: 24px;
+    height: 24px;
+    top: 3px;
+    left: 3px;
+  }
+  .switch.right .knob { transform: translateX(32px); }
+
+  /* Form en una columna (ya tienes regla a 720px; reforzamos y ajustamos gaps) */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+  .colSpan2 { grid-column: auto; }
+
+  /* Entradas legibles y sin zoom iOS */
+  .field > input,
+  .field > select,
+  .field > textarea {
+    font-size: 16px;
+  }
+
+  /* Acciones apiladas y a todo el ancho */
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .primary,
+  .secondary {
+    width: 100%;
+    height: 44px;
+  }
+}

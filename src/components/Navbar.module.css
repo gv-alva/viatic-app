@@ -1,0 +1,68 @@
+.navbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e6e8ee;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Brand (logo + título) */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem; /* 18px */
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+
+/* Botón de logout */
+.logoutButton {
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .15s ease, box-shadow .15s ease;
+  box-shadow: 0 2px 6px rgba(244,67,54,.2);
+}
+.logoutButton:hover {
+  background-color: #d32f2f;
+}
+
+/* Ajustes para móvil */
+@media (max-width: 480px) {
+  .logo {
+    width: 30px;
+    height: 30px;
+  }
+  .title {
+    font-size: 1rem;
+  }
+  .logoutButton {
+    padding: 7px 10px;
+    font-size: .9rem;
+  }
+}
