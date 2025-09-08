@@ -240,7 +240,6 @@ const EditViaticosPage = () => {
                     <span className={styles.place}>{it.cr} · {it.sucursal}</span>
                   </div>
                   <div className={styles.itemBottom}>
-                    <span>Creado: {fmtDMY(it.createdAt || it.fechaGasto)}</span>
                     <span>Fecha gasto: {it.fechaGasto ? fmtDMY(it.fechaGasto) : '—'}</span>
                     {it.tipo === 'gasolina'
                       ? <span>KM: {it.km ?? '—'} ({it.origen} → {it.destino})</span>
