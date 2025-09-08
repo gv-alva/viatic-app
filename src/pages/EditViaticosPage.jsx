@@ -6,6 +6,21 @@ import Navbar from '../components/Navbar';
 import styles from './EditViaticosPage.module.css';
 import bgHome from '../assets/background_home.png';
 
+// --- helper para evitar desfases por zona horaria en fechas tipo "YYYY-MM-DD" ---
+const parseDateSafe = (dateLike) => {
+  if (!dateLike) return null;
+  if (typeof dateLike === 'string') {
+    const m = dateLike.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T)/);
+    if (m) {
+      const y = Number(m[1]);
+      const mo = Number(m[2]);
+      const d = Number(m[3]);
+      return new Date(y, mo - 1, d); // 00:00 local, sin TZ
+    }
+  }
+  return new Date(dateLike);
+};
+
 // --- utils de fechas (ISO week) ---
 const toUTCDate = (d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 const startOfISOWeek = (date) => {
@@ -29,14 +44,14 @@ const isoWeekNumber = (date) => {
   return 1 + Math.floor(diff / 7);
 };
 const fmtDMY = (dateLike) => {
-  const d = new Date(dateLike);
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const yyyy = d.getUTCFullYear();
+  const d = parseDateSafe(dateLike) || new Date(dateLike);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 };
 const weekMeta = (dateLike) => {
-  const d = new Date(dateLike);
+  const d = parseDateSafe(dateLike);
   const start = startOfISOWeek(d);
   const end = endOfISOWeek(start);
   const week = isoWeekNumber(d);
@@ -45,7 +60,7 @@ const weekMeta = (dateLike) => {
   return { key, week, year, start, end, label: `Semana ${week} (${fmtDMY(start)} - ${fmtDMY(end)})` };
 };
 
-// -------- exportar semana a XLSX (carga dinámica: no rompe si no está instalado) --------
+// -------- exportar semana a XLSX (carga dinámica) --------
 const GAS_HEADERS = [
   'Tipo', 'Nombre', 'Fecha del gasto', 'Motivo del gasto', 'CR', 'Nombre Sucursal',
   'Folio de la actividad', 'Origen del trayecto', 'Destino del trayecto', 'KM',
@@ -72,11 +87,11 @@ async function exportWeekToXLSX(group) {
 
   // Comparador: por día (asc) y, si empatan, por hora de creación (asc)
   const startOfDayTS = (v) => {
-    const d = new Date(v.fechaGasto || v.createdAt || 0);
-    d.setHours(0, 0, 0, 0);
+    const base = parseDateSafe(v.fechaGasto) || new Date(v.createdAt || 0);
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
     return d.getTime();
   };
-  const createdTS = (v) => new Date(v.createdAt || v.fechaGasto || 0).getTime();
+  const createdTS = (v) => new Date(v.createdAt || parseDateSafe(v.fechaGasto) || 0).getTime();
 
   const byDateThenCreation = (a, b) => {
     const cmp = startOfDayTS(a) - startOfDayTS(b); // día ascendente
@@ -186,7 +201,7 @@ const EditViaticosPage = () => {
     // 2) Construir grupos usando la semana de la FECHA DEL GASTO (fallback: createdAt)
     const map = new Map();
     for (const v of byCreation) {
-      const baseForWeek = v.fechaGasto ? new Date(v.fechaGasto) : new Date(v.createdAt || Date.now());
+      const baseForWeek = parseDateSafe(v.fechaGasto) || new Date(v.createdAt || Date.now());
       const w = weekMeta(baseForWeek);
       if (!map.has(w.key)) map.set(w.key, { ...w, items: [] });
       map.get(w.key).items.push(v); // preserva orden de creación
@@ -258,4 +273,3 @@ const EditViaticosPage = () => {
 };
 
 export default EditViaticosPage;
-
