@@ -210,7 +210,20 @@ const EditViaticosPage = () => {
     // 3) Ordenar semanas de más reciente a más antigua (según semana de fecha de gasto)
     const arr = Array.from(map.values()).sort((a, b) => b.start - a.start);
 
-    // 4) NO reordenamos dentro de cada semana (ya están por creación)
+    // 4) Ordenar DENTRO de cada semana por fecha de gasto (día asc) y si empatan, por creación (asc)
+    arr.forEach((g) => {
+      g.items.sort((a, b) => {
+        const da = parseDateSafe(a.fechaGasto) || new Date(a.createdAt || 0);
+        const db = parseDateSafe(b.fechaGasto) || new Date(b.createdAt || 0);
+        const aDay = new Date(da.getFullYear(), da.getMonth(), da.getDate()).getTime();
+        const bDay = new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
+        if (aDay !== bDay) return aDay - bDay; // día ascendente
+        const ca = new Date(a.createdAt || 0).getTime();
+        const cb = new Date(b.createdAt || 0).getTime();
+        return ca - cb; // creación ascendente
+      });
+    });
+
     return arr;
   }, [items]);
 
