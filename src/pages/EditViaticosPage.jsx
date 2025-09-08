@@ -171,35 +171,31 @@ const EditViaticosPage = () => {
     }
   }, [token]);
 
-  // Agrupar por semana de la FECHA DEL GASTO (si no hay, usa createdAt)
+  // Agrupar por semana tomando como REFERENCIA la FECHA DEL GASTO (si no hay, fallback a createdAt),
+  // pero mantener el ORDEN **por creación** dentro de cada grupo.
   const groups = useMemo(() => {
+    if (!Array.isArray(items) || items.length === 0) return [];
+
+    // 1) Definir y fijar "orden de creación" global (ascendente)
+    const byCreation = [...items].sort((a, b) => {
+      const ca = new Date(a.createdAt || 0).getTime();
+      const cb = new Date(b.createdAt || 0).getTime();
+      return ca - cb; // más antiguo → más reciente
+    });
+
+    // 2) Construir grupos usando la semana de la FECHA DEL GASTO (fallback: createdAt)
     const map = new Map();
-    for (const v of items) {
-      const base = v.fechaGasto ? new Date(v.fechaGasto) : new Date(v.createdAt || Date.now());
-      const w = weekMeta(base);
+    for (const v of byCreation) {
+      const baseForWeek = v.fechaGasto ? new Date(v.fechaGasto) : new Date(v.createdAt || Date.now());
+      const w = weekMeta(baseForWeek);
       if (!map.has(w.key)) map.set(w.key, { ...w, items: [] });
-      map.get(w.key).items.push(v);
+      map.get(w.key).items.push(v); // preserva orden de creación
     }
+
+    // 3) Ordenar semanas de más reciente a más antigua (según semana de fecha de gasto)
     const arr = Array.from(map.values()).sort((a, b) => b.start - a.start);
 
-    // Orden dentro de cada semana:
-    // 1) por día ascendente
-    // 2) si empatan, por hora de creación ascendente
-    arr.forEach((g) => {
-      g.items.sort((a, b) => {
-        const da = new Date(a.fechaGasto || a.createdAt || 0);
-        const db = new Date(b.fechaGasto || b.createdAt || 0);
-
-        const aDay = new Date(da.getFullYear(), da.getMonth(), da.getDate()).getTime();
-        const bDay = new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
-        const dayCmp = aDay - bDay;
-        if (dayCmp !== 0) return dayCmp;
-
-        const ca = new Date(a.createdAt || a.fechaGasto || 0).getTime();
-        const cb = new Date(b.createdAt || b.fechaGasto || 0).getTime();
-        return ca - cb;
-      });
-    });
+    // 4) NO reordenamos dentro de cada semana (ya están por creación)
     return arr;
   }, [items]);
 
