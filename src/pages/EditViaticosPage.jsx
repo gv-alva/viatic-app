@@ -187,16 +187,16 @@ const EditViaticosPage = () => {
     // 2) si empatan, por hora de creación ascendente
     arr.forEach((g) => {
       g.items.sort((a, b) => {
-        const da = new Date(a.fechaGasto || a.createdAt || 0);
-        const db = new Date(b.fechaGasto || b.createdAt || 0);
+        const da = new Date(a.fechaGasto || 0);
+        const db = new Date(b.fechaGasto || 0);
 
         const aDay = new Date(da.getFullYear(), da.getMonth(), da.getDate()).getTime();
         const bDay = new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
         const dayCmp = aDay - bDay;
         if (dayCmp !== 0) return dayCmp;
 
-        const ca = new Date(a.createdAt || a.fechaGasto || 0).getTime();
-        const cb = new Date(b.createdAt || b.fechaGasto || 0).getTime();
+        const ca = new Date(a.fechaGasto || 0).getTime();
+        const cb = new Date(b.fechaGasto || 0).getTime();
         return ca - cb;
       });
     });
