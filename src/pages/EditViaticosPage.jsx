@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import styles from './EditViaticosPage.module.css';
 import bgHome from '../assets/background_home.png';
 
-// --- utils de semanas (ISO) basadas SOLO en fecha del gasto ---
+// --- utils de fechas (ISO week) ---
 const toUTCDate = (d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 const startOfISOWeek = (date) => {
   const d = toUTCDate(date);
@@ -18,7 +18,6 @@ const startOfISOWeek = (date) => {
 const endOfISOWeek = (start) => {
   const e = new Date(start);
   e.setUTCDate(e.getUTCDate() + 6); // lunes + 6 = domingo
-  e.setUTCHours(23, 59, 59, 999);
   return e;
 };
 const isoWeekNumber = (date) => {
@@ -36,8 +35,8 @@ const fmtDMY = (dateLike) => {
   const yyyy = d.getUTCFullYear();
   return `${dd}/${mm}/${yyyy}`;
 };
-const weekMeta = (fechaGasto) => {
-  const d = new Date(fechaGasto);
+const weekMeta = (dateLike) => {
+  const d = new Date(dateLike);
   const start = startOfISOWeek(d);
   const end = endOfISOWeek(start);
   const week = isoWeekNumber(d);
@@ -46,7 +45,7 @@ const weekMeta = (fechaGasto) => {
   return { key, week, year, start, end, label: `Semana ${week} (${fmtDMY(start)} - ${fmtDMY(end)})` };
 };
 
-// -------- exportar semana a XLSX (solo fecha del gasto) --------
+// -------- exportar semana a XLSX (carga dinámica: no rompe si no está instalado) --------
 const GAS_HEADERS = [
   'Tipo', 'Nombre', 'Fecha del gasto', 'Motivo del gasto', 'CR', 'Nombre Sucursal',
   'Folio de la actividad', 'Origen del trayecto', 'Destino del trayecto', 'KM',
@@ -71,27 +70,33 @@ function buildSheetFromAOA(utils, aoa) {
 async function exportWeekToXLSX(group) {
   const XLSX = await import('xlsx');
 
-  const dayTS = (v) => {
-    const d = new Date(v.fechaGasto || 0);
+  // Comparador: por día (asc) y, si empatan, por hora de creación (asc)
+  const startOfDayTS = (v) => {
+    const d = new Date(v.fechaGasto || v.createdAt || 0);
     d.setHours(0, 0, 0, 0);
     return d.getTime();
   };
+  const createdTS = (v) => new Date(v.createdAt || v.fechaGasto || 0).getTime();
 
-  // Orden: por día (asc). Si empatan, dejamos el orden estable.
-  const byDateOnly = (a, b) => dayTS(a) - dayTS(b);
+  const byDateThenCreation = (a, b) => {
+    const cmp = startOfDayTS(a) - startOfDayTS(b); // día ascendente
+    if (cmp !== 0) return cmp;
+    return createdTS(a) - createdTS(b);            // creación ascendente
+  };
 
   const gasolina = group.items
-    .filter(v => v.tipo === 'gasolina' && v.fechaGasto)
-    .sort(byDateOnly);
+    .filter(v => v.tipo === 'gasolina')
+    .sort(byDateThenCreation);
 
   const viaticos = group.items
-    .filter(v => v.tipo === 'viaticos' && v.fechaGasto)
-    .sort(byDateOnly);
+    .filter(v => v.tipo === 'viaticos')
+    .sort(byDateThenCreation);
 
+  // Construir hojas
   const gasRows = gasolina.map(v => ([
     v.tipoServicio || '',
     v.nombre || '',
-    fmtDMY(v.fechaGasto),
+    fmtDMY(v.fechaGasto || v.createdAt),
     v.motivoGasto || 'Gasolina',
     v.cr || '',
     v.sucursal || '',
@@ -106,7 +111,7 @@ async function exportWeekToXLSX(group) {
   const viaRows = viaticos.map(v => ([
     v.tipoServicio || '',
     v.nombre || '',
-    fmtDMY(v.fechaGasto),
+    fmtDMY(v.fechaGasto || v.createdAt),
     v.motivoGasto || '',
     v.cr || '',
     v.sucursal || '',
@@ -166,49 +171,35 @@ const EditViaticosPage = () => {
     }
   }, [token]);
 
-  // Agrupar por semana SOLO con fecha del gasto.
-  // Si un registro NO tiene fechaGasto, va a la sección "Sin fecha".
+  // Agrupar por semana de la FECHA DEL GASTO (si no hay, usa createdAt)
   const groups = useMemo(() => {
     const map = new Map();
-
-    // bucket para "Sin fecha"
-    const SIN_FECHA_KEY = '__NO_DATE__';
-    const SIN_FECHA_LABEL = 'Sin fecha';
-
     for (const v of items) {
-      if (!v.fechaGasto) {
-        if (!map.has(SIN_FECHA_KEY)) {
-          map.set(SIN_FECHA_KEY, { key: SIN_FECHA_KEY, label: SIN_FECHA_LABEL, items: [] });
-        }
-        map.get(SIN_FECHA_KEY).items.push(v);
-        continue;
-      }
-      const meta = weekMeta(v.fechaGasto);
-      if (!map.has(meta.key)) map.set(meta.key, { ...meta, items: [] });
-      map.get(meta.key).items.push(v);
+      const base = v.fechaGasto ? new Date(v.fechaGasto) : new Date(v.createdAt || Date.now());
+      const w = weekMeta(base);
+      if (!map.has(w.key)) map.set(w.key, { ...w, items: [] });
+      map.get(w.key).items.push(v);
     }
+    const arr = Array.from(map.values()).sort((a, b) => b.start - a.start);
 
-    // Orden de semanas: más recientes primero (por inicio de semana)
-    const arr = Array.from(map.values()).sort((a, b) => {
-      // "Sin fecha" siempre al final
-      if (a.key === SIN_FECHA_KEY && b.key !== SIN_FECHA_KEY) return 1;
-      if (b.key === SIN_FECHA_KEY && a.key !== SIN_FECHA_KEY) return -1;
-      if (a.start && b.start) return b.start - a.start;
-      return 0;
-    });
-
-    // Orden dentro de cada semana: por día (asc). Si empatan, mantener orden estable.
+    // Orden dentro de cada semana:
+    // 1) por día ascendente
+    // 2) si empatan, por hora de creación ascendente
     arr.forEach((g) => {
-      if (g.key === SIN_FECHA_KEY) return;
       g.items.sort((a, b) => {
-        const da = new Date(a.fechaGasto || 0);
-        const db = new Date(b.fechaGasto || 0);
+        const da = new Date(a.fechaGasto || a.createdAt || 0);
+        const db = new Date(b.fechaGasto || b.createdAt || 0);
+
         const aDay = new Date(da.getFullYear(), da.getMonth(), da.getDate()).getTime();
         const bDay = new Date(db.getFullYear(), db.getMonth(), db.getDate()).getTime();
-        return aDay - bDay;
+        const dayCmp = aDay - bDay;
+        if (dayCmp !== 0) return dayCmp;
+
+        const ca = new Date(a.createdAt || a.fechaGasto || 0).getTime();
+        const cb = new Date(b.createdAt || b.fechaGasto || 0).getTime();
+        return ca - cb;
       });
     });
-
     return arr;
   }, [items]);
 
@@ -233,11 +224,9 @@ const EditViaticosPage = () => {
               <div className={styles.weekTitle}>{g.label}</div>
               <div className={styles.weekRight}>
                 <div className={styles.weekCount}>{g.items.length} registro(s)</div>
-                {g.key !== '__NO_DATE__' && (
-                  <button className={styles.exportBtn} onClick={() => exportWeekToXLSX(g)}>
-                    Exportar semana (xlsx)
-                  </button>
-                )}
+                <button className={styles.exportBtn} onClick={() => exportWeekToXLSX(g)}>
+                  Exportar semana (xlsx)
+                </button>
               </div>
             </div>
 
@@ -251,6 +240,7 @@ const EditViaticosPage = () => {
                     <span className={styles.place}>{it.cr} · {it.sucursal}</span>
                   </div>
                   <div className={styles.itemBottom}>
+                    <span>Creado: {fmtDMY(it.createdAt || it.fechaGasto)}</span>
                     <span>Fecha gasto: {it.fechaGasto ? fmtDMY(it.fechaGasto) : '—'}</span>
                     {it.tipo === 'gasolina'
                       ? <span>KM: {it.km ?? '—'} ({it.origen} → {it.destino})</span>
