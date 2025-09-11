@@ -5,6 +5,8 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import styles from './AddViaticoPage.module.css';
 import bgHome from '../assets/background_home.png';
+import { CR_MAP, CR_OVERRIDES, detectCrSucursalFromMensaje, normalizeCr } from '../lib/cr-utils';
+
 
 // --- Folio desde mensaje ---
 const detectFolioFromMensaje = (texto) => {
@@ -25,42 +27,7 @@ const detectFolioFromMensaje = (texto) => {
   return null;
 };
 
-// --- CR -> Sucursal ---
-const CR_MAP = {
-  '1265': 'Tequila','1266': 'Magdalena','1262': 'Ahualulco','1263': 'Etzatlan','1264': 'Amatitan',
-  '0587': 'Ameca','1756': 'Pyme Ameca','3021': 'Dz Ameca','1206': 'Cocula','1249': 'Acatlan',
-  '0451': 'Zacoalco','1207': 'San Martín Hidalgo','0687': 'Banca Gobierno Ameca', '0647': 'Tala', '647': 'Tala',
-  '687': 'Banca Gobierno Ameca', '587': 'Ameca', '0000': 'Tequila', '0001': 'Go Post',
-};
 
-// Overrides de CR: definen destino y folio fijo cuando se detectan en el Mensaje
-const CR_OVERRIDES = {
-  "0000": {
-    folio: "Regreso",
-    destino: "C. Juan Ramón Castañeda Estrella 36A, Texcalame, 46403 Tequila, Jal."
-  },
-  "0001": {
-    folio: "Paqueteria",
-    destino: "C. Francisco I. Madero 146, Centro, 46400 Tequila, Jal."
-  },
-  "1265": {
-    destino: "Jesús Rodríguez de Hijar 1, El Rastro, 46400 Tequila, Jal."
-  },
-};
-
-
-const detectCrSucursalFromMensaje = (texto) => {
-  if (!texto) return null;
-  const upper = texto.toUpperCase();
-  const codes = Object.keys(CR_MAP).join('|');
-  const reCr = new RegExp(`\\bCR[^0-9]{0,3}(${codes})\\b`, 'i');
-  let m = upper.match(reCr);
-  if (m && m[1]) return { cr: m[1], sucursal: CR_MAP[m[1]] };
-  const reAny = new RegExp(`\\b(${codes})\\b`);
-  m = upper.match(reAny);
-  if (m && m[1]) return { cr: m[1], sucursal: CR_MAP[m[1]] };
-  return null;
-};
 
 // --- Fecha (dd/mm/aaaa) -> aaaa-mm-dd ---
 // --- Fecha: acepta dd/mm/aaaa, dd-mm-aaaa, dd.mm.aaaa, dd/mmm(/aaaa), dd mmm (usa año actual si falta) ---
@@ -257,12 +224,19 @@ const AddViaticoPage = () => {
     
 
     if (name === 'cr') {
+      const canon = normalizeCr(value);
       setForm((f) => {
-        const nextCr = value;
+        const nextCr = canon;
         const nextSucursal = CR_MAP[nextCr] ?? f.sucursal;
         const nextFolio = hasReincidentes(f.mensaje) ? `Rei${nextCr}` : f.folio;
         const nextTipo = getTipoFromFolio(nextFolio || f.folio);
-        return { ...f, cr: nextCr, sucursal: nextSucursal, folio: nextFolio, tipoServicio: nextTipo || f.tipoServicio };
+        return {
+          ...f,
+          cr: nextCr,
+          sucursal: nextSucursal,
+          folio: nextFolio,
+          tipoServicio: nextTipo || f.tipoServicio
+        };
       });
       return;
     }
@@ -507,7 +481,7 @@ const AddViaticoPage = () => {
             {/* CR / Sucursal / Folio */}
             <label className={styles.field}>
               <span>CR</span>
-              <input type="text" name="cr" value={form.cr} onChange={onChange} inputMode="numeric" pattern="\d{4}" maxLength={4} required />
+              <input type="text" name="cr" value={form.cr} onChange={onChange} inputMode="numeric" pattern="[0-9]{3,4}" maxLength={4} required />
             </label>
             <label className={styles.field}>
               <span>Sucursal</span>
