@@ -16,6 +16,7 @@ const detectFolioFromMensaje = (texto) => {
   if (/\bWIFI\b/.test(upper)) return 'WIFI';
   const patterns = [
     /\bINC\d{3,}\b/i,
+    /\BINSATM\d{3,}\b/i,
     /\bSCTASK\d{3,}\b/i,
     /\bUA8[- ]?[A-Za-z0-9]{2,}\b/i,
     /\bPDDOCC[- ]?[A-Za-z0-9]{2,}\b/i,
