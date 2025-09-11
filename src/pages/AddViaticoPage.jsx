@@ -104,11 +104,11 @@ const detectFechaFromMensaje = (texto) => {
 
 
 // --- Reglas extra ---
-const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTE ');
+const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTE');
 const getTipoFromFolio = (folio) => {
   if (!folio) return '';
   const f = String(folio).toUpperCase();
-  if (f.startsWith('REI ') || f.startsWith('INC0')) return 'Field Services';
+  if (f.startsWith('REI') || f.startsWith('INC0')) return 'Field Services';
   return 'Instalaciones';
 };
 
@@ -192,7 +192,7 @@ const AddViaticoPage = () => {
         const nextFecha = autoFecha ?? f.fechaGasto;
     
         // Si hay "Reincidentes" + CR, tu regla original
-        const folioRei  = hasReincidentes(value) && nextCr ? `Rei${nextCr}` : null;
+        const folioRei  = hasReincidentes(value) && nextCr ? `Rei ${nextCr}` : null;
     
         // Base (antes de overrides)
         let folioFinal   = folioRei ?? autoFolioStd ?? f.folio;
