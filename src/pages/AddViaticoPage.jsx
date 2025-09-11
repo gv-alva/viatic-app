@@ -435,7 +435,7 @@ const AddViaticoPage = () => {
                 value={form.mensaje}
                 ref={msgRef}
                 onChange={onChange}
-                placeholder='Incluye: Reincidentes / INC... / SCTASK... / UA8... / PDDOCC... / WIFI / CABLEADO..., CR y fecha dd/mm/aaaa o dd/mmm'
+                placeholder='Incluye: Reincidentes / INC... / SCTASK... / UA8... / PDDOCC... / WIFI / CABLEADO... / INSATM..., CR y fecha dd/mm/aaaa o dd/mmm'
 
               />
               <small style={{ color: '#64748b' }}>
