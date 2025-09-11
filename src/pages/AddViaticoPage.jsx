@@ -104,7 +104,7 @@ const detectFechaFromMensaje = (texto) => {
 
 
 // --- Reglas extra ---
-const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTES ');
+const hasReincidentes = (texto) => /\bREINCIDENTES\b/i.test(texto || '');
 const getTipoFromFolio = (folio) => {
   if (!folio) return '';
   const f = String(folio).toUpperCase();
@@ -192,7 +192,8 @@ const AddViaticoPage = () => {
         const nextFecha = autoFecha ?? f.fechaGasto;
     
         // Si hay "Reincidentes" + CR, tu regla original
-        const folioRei  = hasReincidentes(value) && nextCr ? `Rei ${nextCr}` : null;
+        const isRei     = hasReincidentes(value);
+        const folioRei  = isRei && nextCr ? `REI ${nextCr}` : null; 
     
         // Base (antes de overrides)
         let folioFinal   = folioRei ?? autoFolioStd ?? f.folio;
@@ -200,9 +201,9 @@ const AddViaticoPage = () => {
     
         // ✅ Override SOLO cuando el CR viene detectado desde el Mensaje
         if (autoCrSuc?.cr && CR_OVERRIDES[autoCrSuc.cr]) {
-          const override = CR_OVERRIDES[autoCrSuc.cr];
-          folioFinal   = override.folio;
-          destinoFinal = override.destino; // si no quieres pisar valor previo: destinoFinal = f.destino || override.destino;
+          const { folio: folioOv, destino: destinoOv } = CR_OVERRIDES[autoCrSuc.cr];
+          if (!folioRei && folioOv) folioFinal = folioOv;        // no pisar REI
+          if (!destinoFinal && destinoOv) destinoFinal = destinoOv;
         }
     
         const tipoAuto = folioFinal
@@ -229,7 +230,7 @@ const AddViaticoPage = () => {
       setForm((f) => {
         const nextCr = canon;
         const nextSucursal = CR_MAP[nextCr] ?? f.sucursal;
-        const nextFolio = hasReincidentes(f.mensaje) ? `Rei ${nextCr}` : f.folio;
+        const nextFolio = hasReincidentes(f.mensaje) && nextCr ? `REI ${nextCr}` : f.folio;
         const nextTipo = getTipoFromFolio(nextFolio || f.folio);
         return {
           ...f,
