@@ -27,7 +27,7 @@ const detectFolioFromMensaje = (texto) => {
 
 // --- CR -> Sucursal ---
 const CR_MAP = {
-  '1265': 'Tequila','1266': 'Amatitan','1262': 'Ahualulco','1263': 'Etzatlan','1264': 'Amatitan',
+  '1265': 'Tequila','1266': 'Magdalena','1262': 'Ahualulco','1263': 'Etzatlan','1264': 'Amatitan',
   '0587': 'Ameca','1756': 'Pyme Ameca','3021': 'Dz Ameca','1206': 'Cocula','1249': 'Acatlan',
   '0451': 'Zacoalco','1207': 'San Martín Hidalgo','0687': 'Banca Gobierno Ameca', '0647': 'Tala', '647': 'Tala',
   '687': 'Banca Gobierno Ameca', '587': 'Ameca', '0000': 'Tequila', '0001': 'Go Post',
@@ -43,7 +43,9 @@ const CR_OVERRIDES = {
     folio: "Paqueteria",
     destino: "C. Francisco I. Madero 146, Centro, 46400 Tequila, Jal."
   },
-  // 👉 aquí puedes seguir agregando más CR con su folio y destino
+  "1265": {
+    destino: "Jesús Rodríguez de Hijar 1, El Rastro, 46400 Tequila, Jal."
+  },
 };
 
 
