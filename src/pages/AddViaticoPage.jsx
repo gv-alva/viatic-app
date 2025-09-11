@@ -192,7 +192,7 @@ const AddViaticoPage = () => {
         const nextFecha = autoFecha ?? f.fechaGasto;
     
         // Si hay "Reincidentes" + CR, tu regla original
-        const folioRei  = hasReincidentes(value) && nextCr ? `Rei ${nextCr}` : null;
+        const folioRei  = hasReincidentes(value) && nextCr ? `Rei${nextCr}` : null;
     
         // Base (antes de overrides)
         let folioFinal   = folioRei ?? autoFolioStd ?? f.folio;
