@@ -104,7 +104,7 @@ const detectFechaFromMensaje = (texto) => {
 
 
 // --- Reglas extra ---
-const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTE');
+const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTES ');
 const getTipoFromFolio = (folio) => {
   if (!folio) return '';
   const f = String(folio).toUpperCase();
