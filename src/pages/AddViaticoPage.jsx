@@ -229,7 +229,7 @@ const AddViaticoPage = () => {
       setForm((f) => {
         const nextCr = canon;
         const nextSucursal = CR_MAP[nextCr] ?? f.sucursal;
-        const nextFolio = hasReincidentes(f.mensaje) ? `Rei${nextCr}` : f.folio;
+        const nextFolio = hasReincidentes(f.mensaje) ? `Rei ${nextCr}` : f.folio;
         const nextTipo = getTipoFromFolio(nextFolio || f.folio);
         return {
           ...f,
