@@ -104,11 +104,11 @@ const detectFechaFromMensaje = (texto) => {
 
 
 // --- Reglas extra ---
-const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTES');
+const hasReincidentes = (texto) => (texto || '').toUpperCase().includes('REINCIDENTE ');
 const getTipoFromFolio = (folio) => {
   if (!folio) return '';
   const f = String(folio).toUpperCase();
-  if (f.startsWith('REI') || f.startsWith('INC0')) return 'Field Services';
+  if (f.startsWith('REI ') || f.startsWith('INC0')) return 'Field Services';
   return 'Instalaciones';
 };
 
