@@ -22,7 +22,6 @@ const CANON = (code) => {
 // Acepta 3 o 4 dígitos en texto y normaliza
 const VARIANTS = Array.from(new Set([
   ...KEYS,
-  ...KEYS.map((k) => k.padStart(4, "0")),
   ...KEYS.map((k) => String(Number(k))) // "0647" → "647"
 ]));
 
