@@ -19,12 +19,7 @@ const CANON = (code) => {
   return KEY_SET.has(p4) ? p4 : (KEY_SET.has(digits) ? digits : null);
 };
 
-// Acepta 3 o 4 dígitos en texto y normaliza
-const VARIANTS = Array.from(new Set([
-  ...KEYS,
-  ...KEYS.map((k) => k.padStart(4, "0")),
-  ...KEYS.map((k) => String(Number(k))) // "0647" → "647"
-]));
+
 
 const RX_CODES = new RegExp(`\\b(${VARIANTS.map(escapeRx).join("|")})\\b`, "i");
 const RX_CR    = new RegExp(`\\bCR[^0-9]{0,3}(${VARIANTS.map(escapeRx).join("|")})\\b`, "i");
