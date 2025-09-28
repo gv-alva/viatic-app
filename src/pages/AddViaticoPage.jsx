@@ -226,9 +226,9 @@ const AddViaticoPage = () => {
     
 
     if (name === 'cr') {
-      const canon = normalizeCr(value);
+      const digits = value.replace(/\D/g, ''); 
       setForm((f) => {
-        const nextCr = canon;
+        const nextCr = digits;
         const nextSucursal = CR_MAP[nextCr] ?? f.sucursal;
         const nextFolio = hasReincidentes(f.mensaje) && nextCr ? `REI ${nextCr}` : f.folio;
         const nextTipo = getTipoFromFolio(nextFolio || f.folio);
